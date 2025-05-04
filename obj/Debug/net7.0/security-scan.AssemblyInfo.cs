@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("security-scan")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+85ab4ab3cd0aead8bad813233f82319b986d6fbd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+db7fc647bfa6620201c99e0b08024ee229eaf35e")]
 [assembly: System.Reflection.AssemblyProductAttribute("security-scan")]
 [assembly: System.Reflection.AssemblyTitleAttribute("security-scan")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
