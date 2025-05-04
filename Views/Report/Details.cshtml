@@ -1,0 +1,28 @@
+@model security_scan.Models.Report
+
+@{
+    ViewData["Title"] = "Scan Details";
+}
+
+<h2>Scan Details</h2>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-3">Date</dt>
+        <dd class="col-sm-9">@Model.ScanDate</dd>
+
+        <dt class="col-sm-3">Severity</dt>
+        <dd class="col-sm-9">@Model.SeverityLevel</dd>
+
+        <dt class="col-sm-3">Summary</dt>
+        <dd class="col-sm-9">@Model.Summary</dd>
+        <dt class="col-sm-3">Note</dt>
+        <dd class="col-sm-9">@Model.Note</dd>
+
+
+
+    </dl>
+</div>
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit Note</a>
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+

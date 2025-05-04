@@ -1,0 +1,27 @@
+@model security_scan.Models.Report
+
+@{
+    ViewData["Title"] = "Delete Scan";
+}
+
+<h2>Delete Scan</h2>
+
+<h4>Are you sure you want to delete this scan?</h4>
+
+<dl class="row">
+    <dt class="col-sm-3">Date</dt>
+    <dd class="col-sm-9">@Model.ScanDate</dd>
+
+    <dt class="col-sm-3">Severity</dt>
+    <dd class="col-sm-9">@Model.SeverityLevel</dd>
+
+    <dt class="col-sm-3">Summary</dt>
+    <dd class="col-sm-9">@Model.Summary</dd>
+</dl>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

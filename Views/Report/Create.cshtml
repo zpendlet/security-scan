@@ -1,0 +1,25 @@
+@model security_scan.Models.Report
+
+@{
+    ViewData["Title"] = "Create Scan";
+}
+
+<h2>Create New Scan</h2>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+    <label asp-for="Note" class="form-label"></label>
+    <textarea asp-for="Note" class="form-control"></textarea>
+    <span asp-validation-for="Note" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Submit Scan</button>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

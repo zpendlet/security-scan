@@ -1,0 +1,15 @@
+{
+    "S3Buckets": [
+      { "Name": "public-bucket", "PublicAccess": true },
+      { "Name": "private-bucket", "PublicAccess": false }
+    ],
+    "IamPolicies": [
+      { "Name": "AdminAccess", "IsTooPermissive": true },
+      { "Name": "ReadOnly", "IsTooPermissive": false }
+    ],
+    "SecurityGroups": [
+      { "Name": "web-sg", "OpenPorts": [22, 80, 443] },
+      { "Name": "internal-sg", "OpenPorts": [] }
+    ]
+  }
+  

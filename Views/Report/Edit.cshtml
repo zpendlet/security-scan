@@ -1,0 +1,26 @@
+@model security_scan.Models.Report
+
+@{
+    ViewData["Title"] = "Edit Summary Note";
+}
+
+<h2>Edit Summary Note</h2>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+    <label asp-for="Note" class="form-label"></label>
+    <textarea asp-for="Note" class="form-control"></textarea>
+    <span asp-validation-for="Note" class="text-danger"></span>
+    </div>
+
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,36 @@
+@model IEnumerable<security_scan.Models.Report>
+
+@{
+    ViewData["Title"] = "My Reports";
+}
+
+<h2>My Reports</h2>
+
+<p>
+    <a class="btn btn-primary" asp-action="Create">Create New Scan</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Severity</th>
+            <th>Summary</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model)
+{
+    <tr>
+        <td>@item.ScanDate.ToString("g")</td>
+        <td>@item.SeverityLevel</td>
+        <td>@item.Summary</td>
+        <td>
+            <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@item.Id">Details</a>
+            <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+        </td>
+    </tr>
+}
+    </tbody>
+</table>
