@@ -25,7 +25,6 @@ namespace security_scan.Controllers
             _env = env;
         }
 
-
         // GET: /Report/
         public async Task<IActionResult> Index()
         {
@@ -44,86 +43,68 @@ namespace security_scan.Controllers
             return View();
         }
 
-        // POST: /Report/Create
+        // POST: /Report/Create (Handles both AJAX and standard form)
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Summary,Note")] Report report)
+        public async Task<IActionResult> Create([FromBody] Report reportJson)
         {
-            Console.WriteLine("POST /Report/Create triggered");
+            Report report;
 
-            if (!ModelState.IsValid)
+            if (Request.ContentType.Contains("application/json"))
             {
-                Console.WriteLine("ModelState is NOT valid:");
-                foreach (var kvp in ModelState)
-                {
-                    foreach (var error in kvp.Value.Errors)
-                    {
-                        Console.WriteLine($" - {kvp.Key}: {error.ErrorMessage}");
-                    }
-                }
-                return View(report); // return early if invalid
+                // Coming from AJAX
+                if (string.IsNullOrWhiteSpace(reportJson.Note))
+                    return BadRequest("Note is required.");
+
+                report = new Report { Note = reportJson.Note };
+            }
+            else
+            {
+                // Fallback for non-AJAX, bind from form
+                report = new Report();
+                await TryUpdateModelAsync(report, prefix: "", includeExpressions: m => m.Note);
+                if (!ModelState.IsValid)
+                    return View(report);
             }
 
-            Console.WriteLine("ModelState IS valid — proceeding with scan");
-
             var findings = new List<string>();
-
             try
             {
                 var jsonPath = Path.Combine(_env.WebRootPath, "mock-data", "mockScanResult.json");
-
-                Console.WriteLine("Reading from: " + jsonPath);
-
                 var json = await System.IO.File.ReadAllTextAsync(jsonPath);
                 var scanData = JsonSerializer.Deserialize<MockScanResult>(json);
 
-                foreach (var bucket in scanData.S3Buckets)
-                {
-                    if (bucket.PublicAccess)
-                        findings.Add($"S3 Bucket '{bucket.Name}' is public.");
-                }
-
-                foreach (var policy in scanData.IamPolicies)
-                {
-                    if (policy.IsTooPermissive)
-                        findings.Add($"IAM Policy '{policy.Name}' is overly permissive.");
-                }
-
-                foreach (var sg in scanData.SecurityGroups)
-                {
-                    if (sg.OpenPorts.Any())
-                        findings.Add($"Security Group '{sg.Name}' has open ports: {string.Join(", ", sg.OpenPorts)}");
-                }
+                findings.AddRange(scanData.S3Buckets.Where(b => b.PublicAccess).Select(b => $"S3 Bucket '{b.Name}' is public."));
+                findings.AddRange(scanData.IamPolicies.Where(p => p.IsTooPermissive).Select(p => $"IAM Policy '{p.Name}' is overly permissive."));
+                findings.AddRange(scanData.SecurityGroups.Where(sg => sg.OpenPorts.Any()).Select(sg => $"Security Group '{sg.Name}' has open ports: {string.Join(", ", sg.OpenPorts)}"));
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error loading mock data: " + ex.Message);
                 findings.Add($"Error loading scan data: {ex.Message}");
             }
 
             report.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             report.ScanDate = DateTime.UtcNow;
-            report.SeverityLevel = findings.Count > 0 ? "High" : "Low";
+            report.SeverityLevel = findings.Any() ? "High" : "Low";
             report.Summary = findings.Any() ? string.Join("\n", findings) : "No issues found.";
 
             _context.Add(report);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            if (Request.ContentType.Contains("application/json"))
+                return Ok(); // AJAX response
+            else
+                return RedirectToAction(nameof(Index));
         }
 
         // GET: /Report/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var report = await _context.Reports
-                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
-
-            if (report == null)
-                return NotFound();
+            var report = await _context.Reports.FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+            if (report == null) return NotFound();
 
             return View(report);
         }
@@ -131,15 +112,11 @@ namespace security_scan.Controllers
         // GET: /Report/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var report = await _context.Reports
-                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
-
-            if (report == null)
-                return NotFound();
+            var report = await _context.Reports.FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+            if (report == null) return NotFound();
 
             return View(report);
         }
@@ -150,8 +127,7 @@ namespace security_scan.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var report = await _context.Reports
-                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+            var report = await _context.Reports.FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
 
             if (report != null)
             {
@@ -162,19 +138,14 @@ namespace security_scan.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         // GET: /Report/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-                return NotFound();
+            if (id == null) return NotFound();
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var report = await _context.Reports
-                .FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
-
-            if (report == null)
-                return NotFound();
+            var report = await _context.Reports.FirstOrDefaultAsync(r => r.Id == id && r.UserId == userId);
+            if (report == null) return NotFound();
 
             return View(report);
         }
@@ -193,9 +164,5 @@ namespace security_scan.Controllers
 
             return RedirectToAction(nameof(Details), new { id = id });
         }
-
-
     }
-
-
 }

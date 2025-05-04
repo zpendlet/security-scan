@@ -6,14 +6,17 @@
 
 <h2>Create New Scan</h2>
 
-<form asp-action="Create" method="post">
-    @Html.AntiForgeryToken()
+<div id="scan-alert" class="alert alert-success d-none" role="alert">
+    Scan submitted successfully!
+</div>
+
+<form id="scanForm" method="post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <div class="mb-3">
-    <label asp-for="Note" class="form-label"></label>
-    <textarea asp-for="Note" class="form-control"></textarea>
-    <span asp-validation-for="Note" class="text-danger"></span>
+        <label asp-for="Note" class="form-label"></label>
+        <textarea asp-for="Note" class="form-control"></textarea>
+        <span asp-validation-for="Note" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-success">Submit Scan</button>
@@ -22,4 +25,31 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('scanForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+            const payload = {
+                note: formData.get("Note")
+            };
+
+            const response = await fetch('/Report/Create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                document.getElementById('scan-alert').classList.remove('d-none');
+                form.reset();
+            } else {
+                alert("Something went wrong. Please try again.");
+            }
+        });
+    </script>
 }
